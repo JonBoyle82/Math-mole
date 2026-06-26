@@ -15,6 +15,12 @@ export default function Home({ gameData, navigate }) {
     <div className="flex flex-col items-center px-4 pt-8 pb-6 gap-5">
       {/* Title */}
       <div className="text-center">
+        <p
+          className="text-4xl text-pink-400 drop-shadow-sm"
+          style={{ fontFamily: "'Dancing Script', cursive", transform: 'rotate(-4deg)', display: 'inline-block' }}
+        >
+          Cayleigh's
+        </p>
         <h1 className="font-fun text-5xl text-purple-700 drop-shadow-md">Math Mole</h1>
         <p className="text-lg text-purple-500 font-semibold mt-1">Learn × &amp; Fractions &amp; %!</p>
       </div>
