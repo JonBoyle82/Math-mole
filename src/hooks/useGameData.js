@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react'
 import {
-  getAllData, recordFactResult, recordFractionResult,
+  getAllData, recordFactResult, recordFractionResult, recordFractionSumResult,
   addPoints, incrementStreak, resetStreak,
-  unlockBadge, isTableMastered, getFactAccuracy,
+  unlockBadge, isTableMastered, isBakeryMastered, getFactAccuracy,
   unlockCosmetic, getUnlockedCosmetics, getActiveCosmetic, setActiveCosmetic,
-  getPoints, getStreak, getBestStreak, getUnlockedBadges,
+  getPoints, getStreak, getBestStreak, getUnlockedBadges, isBakeryUnlocked,
 } from '../utils/storage'
 
 export function useGameData() {
@@ -21,11 +21,9 @@ export function useGameData() {
     if (correct) {
       pts = addPoints(10 + Math.floor(data.streak * 1.5))
       streak = incrementStreak()
-      // Check badge unlock
       const table = Math.min(a, b)
       if (isTableMastered(table)) {
-        const badgeId = `table_${table}`
-        unlockBadge(badgeId)
+        unlockBadge(`table_${table}`)
       }
     } else {
       streak = resetStreak()
@@ -50,7 +48,36 @@ export function useGameData() {
     } else {
       streak = resetStreak()
     }
-    setData(prev => ({ ...prev, points: pts, streak, bestStreak: Math.max(prev.bestStreak, streak) }))
+    setData(prev => ({
+      ...prev,
+      points: pts,
+      streak,
+      bestStreak: Math.max(prev.bestStreak, streak),
+      bakeryUnlocked: isBakeryUnlocked(),
+    }))
+    return { points: pts, streak }
+  }, [data])
+
+  const handleFractionSumResult = useCallback((tier, correct) => {
+    recordFractionSumResult(tier, correct)
+    let pts = data.points
+    let streak = data.streak
+    if (correct) {
+      pts = addPoints(20 + Math.floor(data.streak * 2))
+      streak = incrementStreak()
+      if (isBakeryMastered()) {
+        unlockBadge('bakery_apprentice')
+      }
+    } else {
+      streak = resetStreak()
+    }
+    setData(prev => ({
+      ...prev,
+      points: pts,
+      streak,
+      bestStreak: Math.max(prev.bestStreak, streak),
+      unlockedBadges: getUnlockedBadges(),
+    }))
     return { points: pts, streak }
   }, [data])
 
@@ -71,5 +98,5 @@ export function useGameData() {
     setData(prev => ({ ...prev, activeCosmetic: id }))
   }, [])
 
-  return { data, refresh, handleFactResult, handleFractionResult, purchaseCosmetic, changeCosmetic }
+  return { data, refresh, handleFactResult, handleFractionResult, handleFractionSumResult, purchaseCosmetic, changeCosmetic }
 }

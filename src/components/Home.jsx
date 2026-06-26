@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 const MOLE_COLORS = {
   default: 'from-amber-400 to-amber-600',
   blue: 'from-blue-400 to-blue-600',
@@ -56,6 +54,23 @@ export default function Home({ gameData, navigate }) {
           label="Pizza Fractions"
           sub="Match the slices!"
         />
+
+        {/* Fraction Bakery — locked until 80% Pizza Match accuracy over 15 attempts */}
+        {data.bakeryUnlocked ? (
+          <BigButton
+            onClick={() => navigate('bakery')}
+            color="bg-gradient-to-r from-orange-400 to-amber-500"
+            icon="🧁"
+            label="Fraction Bakery"
+            sub="Add fractions to fill orders!"
+          />
+        ) : (
+          <LockedButton
+            icon="🧁"
+            label="Fraction Bakery"
+            hint="Get a bit more pizza practice first! (80% on Pizza Match to unlock)"
+          />
+        )}
       </div>
 
       {/* Secondary buttons */}
@@ -103,5 +118,22 @@ function BigButton({ onClick, color, icon, label, sub }) {
       </div>
       <span className="ml-auto text-2xl">›</span>
     </button>
+  )
+}
+
+function LockedButton({ icon, label, hint }) {
+  return (
+    <div
+      className="bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 rounded-3xl py-5 px-6 flex items-center gap-4 w-full"
+      style={{ minHeight: 80 }}
+    >
+      <span className="text-4xl opacity-50">{icon}</span>
+      <div className="text-left flex-1">
+        <div className="font-fun text-2xl leading-tight flex items-center gap-2">
+          {label} <span className="text-lg">🔒</span>
+        </div>
+        <div className="text-xs text-gray-400 font-semibold mt-0.5">{hint}</div>
+      </div>
+    </div>
   )
 }

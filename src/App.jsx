@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Home from './components/Home'
 import TimesTablesGame from './components/TimesTablesGame'
 import FractionsGame from './components/FractionsGame'
+import BakeryGame from './components/BakeryGame'
 import LearningBoard from './components/LearningBoard'
 import RewardsScreen from './components/RewardsScreen'
 import { useGameData } from './hooks/useGameData'
@@ -18,6 +19,7 @@ export default function App() {
         {screen === 'home' && <Home gameData={gameData} navigate={navigate} />}
         {screen === 'times' && <TimesTablesGame gameData={gameData} navigate={navigate} />}
         {screen === 'fractions' && <FractionsGame gameData={gameData} navigate={navigate} />}
+        {screen === 'bakery' && <BakeryGame gameData={gameData} navigate={navigate} />}
         {screen === 'board' && <LearningBoard navigate={navigate} />}
         {screen === 'rewards' && <RewardsScreen gameData={gameData} navigate={navigate} />}
       </div>

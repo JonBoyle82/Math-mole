@@ -1,6 +1,8 @@
 const KEYS = {
   FACT_ACCURACY: 'mm_factAccuracy',
   FRACTION_PROGRESS: 'mm_fractionProgress',
+  FRACTION_RECENT: 'mm_fractionRecent',        // rolling window for bakery unlock check
+  FRACTION_SUMS_PROGRESS: 'mm_fractionSumsProgress',
   POINTS: 'mm_points',
   STREAK: 'mm_streak',
   BEST_STREAK: 'mm_bestStreak',
@@ -20,6 +22,8 @@ function save(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)) } catch {}
 }
 
+// ── Times Tables ──────────────────────────────────────────────────────────────
+
 export function getFactAccuracy() {
   return load(KEYS.FACT_ACCURACY, {})
 }
@@ -31,7 +35,6 @@ export function recordFactResult(a, b, correct) {
   acc[key] = {
     correct: prev.correct + (correct ? 1 : 0),
     attempts: prev.attempts + 1,
-    // Keep last 10 results as a rolling array for badge calculation
     recent: [...(prev.recent || []).slice(-9), correct ? 1 : 0],
   }
   save(KEYS.FACT_ACCURACY, acc)
@@ -39,7 +42,6 @@ export function recordFactResult(a, b, correct) {
 }
 
 export function getFactMasteryLevel(a, b) {
-  // Returns 0-3: 0=unseen, 1=learning, 2=familiar, 3=mastered
   const acc = getFactAccuracy()
   const key = `${a}x${b}`
   const data = acc[key]
@@ -51,7 +53,6 @@ export function getFactMasteryLevel(a, b) {
 }
 
 export function isTableMastered(table) {
-  // 90%+ accuracy over last 10 attempts for each fact in this table
   const acc = getFactAccuracy()
   for (let i = 1; i <= 12; i++) {
     const key = `${table}x${i}`
@@ -65,6 +66,8 @@ export function isTableMastered(table) {
   return true
 }
 
+// ── Pizza Match fractions ─────────────────────────────────────────────────────
+
 export function getFractionProgress() {
   return load(KEYS.FRACTION_PROGRESS, {})
 }
@@ -77,7 +80,50 @@ export function recordFractionResult(tier, correct) {
     attempts: prev.attempts + 1,
   }
   save(KEYS.FRACTION_PROGRESS, prog)
+
+  // Rolling window used by bakery unlock gate
+  const recent = load(KEYS.FRACTION_RECENT, [])
+  recent.push(correct ? 1 : 0)
+  if (recent.length > 20) recent.shift()
+  save(KEYS.FRACTION_RECENT, recent)
 }
+
+// Unlock Fraction Bakery once 80%+ accuracy over last 15 Pizza Match attempts
+export function isBakeryUnlocked() {
+  const recent = load(KEYS.FRACTION_RECENT, [])
+  if (recent.length < 15) return false
+  const last15 = recent.slice(-15)
+  return last15.reduce((s, v) => s + v, 0) / 15 >= 0.8
+}
+
+// ── Fraction Bakery ───────────────────────────────────────────────────────────
+
+export function getFractionSumsProgress() {
+  return load(KEYS.FRACTION_SUMS_PROGRESS, {})
+}
+
+export function recordFractionSumResult(tier, correct) {
+  const prog = getFractionSumsProgress()
+  const prev = prog[tier] || { correct: 0, attempts: 0, recent: [] }
+  prog[tier] = {
+    correct: prev.correct + (correct ? 1 : 0),
+    attempts: prev.attempts + 1,
+    recent: [...(prev.recent || []).slice(-19), correct ? 1 : 0],
+  }
+  save(KEYS.FRACTION_SUMS_PROGRESS, prog)
+  return prog
+}
+
+// Bakery Apprentice badge: 80%+ over last 20 bakery attempts (any tier)
+export function isBakeryMastered() {
+  const prog = getFractionSumsProgress()
+  const allRecent = Object.values(prog).flatMap(d => d.recent || [])
+  if (allRecent.length < 20) return false
+  const last20 = allRecent.slice(-20)
+  return last20.reduce((s, v) => s + v, 0) / 20 >= 0.8
+}
+
+// ── Points & Streak ───────────────────────────────────────────────────────────
 
 export function getPoints() { return load(KEYS.POINTS, 0) }
 export function addPoints(n) {
@@ -96,6 +142,8 @@ export function incrementStreak() {
   return s
 }
 export function resetStreak() { save(KEYS.STREAK, 0); return 0 }
+
+// ── Badges & Cosmetics ────────────────────────────────────────────────────────
 
 export function getUnlockedBadges() { return load(KEYS.UNLOCKED_BADGES, []) }
 export function unlockBadge(badge) {
@@ -120,10 +168,14 @@ export function unlockCosmetic(id) {
 export function getActiveCosmetic() { return load(KEYS.ACTIVE_COSMETIC, 'default') }
 export function setActiveCosmetic(id) { save(KEYS.ACTIVE_COSMETIC, id) }
 
+// ── Aggregate ─────────────────────────────────────────────────────────────────
+
 export function getAllData() {
   return {
     factAccuracy: getFactAccuracy(),
     fractionProgress: getFractionProgress(),
+    fractionSumsProgress: getFractionSumsProgress(),
+    bakeryUnlocked: isBakeryUnlocked(),
     points: getPoints(),
     streak: getStreak(),
     bestStreak: getBestStreak(),

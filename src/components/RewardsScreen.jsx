@@ -1,11 +1,19 @@
 import { useState } from 'react'
 
-const BADGES = Array.from({ length: 12 }, (_, i) => ({
-  id: `table_${i + 1}`,
-  label: `× ${i + 1}`,
-  emoji: ['2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟','1️⃣1️⃣','1️⃣2️⃣','⭐'][i] || '🏅',
-  desc: `Mastered the ${i + 1} times table`,
-}))
+const BADGES = [
+  ...Array.from({ length: 12 }, (_, i) => ({
+    id: `table_${i + 1}`,
+    label: `× ${i + 1}`,
+    emoji: ['2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟','1️⃣1️⃣','1️⃣2️⃣','⭐'][i] || '🏅',
+    desc: `Mastered the ${i + 1} times table`,
+  })),
+  {
+    id: 'bakery_apprentice',
+    label: 'Bakery Apprentice',
+    emoji: '🧁',
+    desc: '80%+ accuracy over 20 Fraction Bakery attempts',
+  },
+]
 
 const COSMETICS = [
   { id: 'default', label: 'Classic', color: 'from-amber-400 to-amber-600', cost: 0, emoji: '🦔' },
