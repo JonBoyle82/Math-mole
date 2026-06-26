@@ -1,8 +1,10 @@
 const KEYS = {
   FACT_ACCURACY: 'mm_factAccuracy',
   FRACTION_PROGRESS: 'mm_fractionProgress',
-  FRACTION_RECENT: 'mm_fractionRecent',        // rolling window for bakery unlock check
+  FRACTION_RECENT: 'mm_fractionRecent',
   FRACTION_SUMS_PROGRESS: 'mm_fractionSumsProgress',
+  PERCENTAGE_PROGRESS: 'mm_percentageProgress',
+  PCT_T2_RECENT: 'mm_pctT2Recent',           // rolling window for discount tier unlock
   POINTS: 'mm_points',
   STREAK: 'mm_streak',
   BEST_STREAK: 'mm_bestStreak',
@@ -81,14 +83,12 @@ export function recordFractionResult(tier, correct) {
   }
   save(KEYS.FRACTION_PROGRESS, prog)
 
-  // Rolling window used by bakery unlock gate
   const recent = load(KEYS.FRACTION_RECENT, [])
   recent.push(correct ? 1 : 0)
   if (recent.length > 20) recent.shift()
   save(KEYS.FRACTION_RECENT, recent)
 }
 
-// Unlock Fraction Bakery once 80%+ accuracy over last 15 Pizza Match attempts
 export function isBakeryUnlocked() {
   const recent = load(KEYS.FRACTION_RECENT, [])
   if (recent.length < 15) return false
@@ -114,9 +114,52 @@ export function recordFractionSumResult(tier, correct) {
   return prog
 }
 
-// Bakery Apprentice badge: 80%+ over last 20 bakery attempts (any tier)
 export function isBakeryMastered() {
   const prog = getFractionSumsProgress()
+  const allRecent = Object.values(prog).flatMap(d => d.recent || [])
+  if (allRecent.length < 20) return false
+  const last20 = allRecent.slice(-20)
+  return last20.reduce((s, v) => s + v, 0) / 20 >= 0.8
+}
+
+// ── Mole Mart percentages ─────────────────────────────────────────────────────
+
+export function getPercentageProgress() {
+  return load(KEYS.PERCENTAGE_PROGRESS, {})
+}
+
+export function recordPercentageResult(tier, correct) {
+  const prog = getPercentageProgress()
+  const prev = prog[tier] || { correct: 0, attempts: 0, recent: [] }
+  prog[tier] = {
+    correct: prev.correct + (correct ? 1 : 0),
+    attempts: prev.attempts + 1,
+    recent: [...(prev.recent || []).slice(-19), correct ? 1 : 0],
+  }
+  save(KEYS.PERCENTAGE_PROGRESS, prog)
+
+  // Maintain Tier 2 rolling window for discount unlock gate
+  if (tier === 'tier2') {
+    const recent = load(KEYS.PCT_T2_RECENT, [])
+    recent.push(correct ? 1 : 0)
+    if (recent.length > 20) recent.shift()
+    save(KEYS.PCT_T2_RECENT, recent)
+  }
+
+  return prog
+}
+
+// Unlock Tier 3 Discounts once 80%+ on last 15 Tier 2 attempts
+export function isDiscountUnlocked() {
+  const recent = load(KEYS.PCT_T2_RECENT, [])
+  if (recent.length < 15) return false
+  const last15 = recent.slice(-15)
+  return last15.reduce((s, v) => s + v, 0) / 15 >= 0.8
+}
+
+// Smart Shopper badge: 80%+ over last 20 Mole Mart attempts (any tier)
+export function isSmartShopperMastered() {
+  const prog = getPercentageProgress()
   const allRecent = Object.values(prog).flatMap(d => d.recent || [])
   if (allRecent.length < 20) return false
   const last20 = allRecent.slice(-20)
@@ -175,7 +218,9 @@ export function getAllData() {
     factAccuracy: getFactAccuracy(),
     fractionProgress: getFractionProgress(),
     fractionSumsProgress: getFractionSumsProgress(),
+    percentageProgress: getPercentageProgress(),
     bakeryUnlocked: isBakeryUnlocked(),
+    discountUnlocked: isDiscountUnlocked(),
     points: getPoints(),
     streak: getStreak(),
     bestStreak: getBestStreak(),

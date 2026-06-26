@@ -13,6 +13,12 @@ const BADGES = [
     emoji: '🧁',
     desc: '80%+ accuracy over 20 Fraction Bakery attempts',
   },
+  {
+    id: 'smart_shopper',
+    label: 'Smart Shopper',
+    emoji: '🛒',
+    desc: '80%+ accuracy over 20 Mole Mart attempts',
+  },
 ]
 
 const COSMETICS = [

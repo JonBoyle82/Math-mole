@@ -12,16 +12,16 @@ export default function Home({ gameData, navigate }) {
   const badgeCount = data.unlockedBadges.length
 
   return (
-    <div className="flex flex-col items-center px-4 pt-8 pb-6 gap-6">
+    <div className="flex flex-col items-center px-4 pt-8 pb-6 gap-5">
       {/* Title */}
       <div className="text-center">
         <h1 className="font-fun text-5xl text-purple-700 drop-shadow-md">Math Mole</h1>
-        <p className="text-lg text-purple-500 font-semibold mt-1">Learn × &amp; Fractions!</p>
+        <p className="text-lg text-purple-500 font-semibold mt-1">Learn × &amp; Fractions &amp; %!</p>
       </div>
 
       {/* Mole mascot */}
       <div className="relative">
-        <div className={`w-32 h-32 rounded-full bg-gradient-to-br ${moleBg} flex items-center justify-center shadow-xl border-4 border-white`}>
+        <div className={`w-28 h-28 rounded-full bg-gradient-to-br ${moleBg} flex items-center justify-center shadow-xl border-4 border-white`}>
           <span className="text-6xl select-none">🦔</span>
         </div>
         {badgeCount > 0 && (
@@ -32,14 +32,14 @@ export default function Home({ gameData, navigate }) {
       </div>
 
       {/* Stats row */}
-      <div className="flex gap-4 w-full justify-center">
+      <div className="flex gap-3 w-full justify-center">
         <StatChip icon="⭐" label="Points" value={data.points} color="bg-yellow-100 text-yellow-700" />
         <StatChip icon="🔥" label="Streak" value={data.streak} color="bg-orange-100 text-orange-700" />
         <StatChip icon="🏆" label="Best" value={data.bestStreak} color="bg-purple-100 text-purple-700" />
       </div>
 
       {/* Mode buttons */}
-      <div className="flex flex-col gap-4 w-full mt-2">
+      <div className="flex flex-col gap-3 w-full">
         <BigButton
           onClick={() => navigate('times')}
           color="bg-gradient-to-r from-purple-500 to-indigo-600"
@@ -55,7 +55,7 @@ export default function Home({ gameData, navigate }) {
           sub="Match the slices!"
         />
 
-        {/* Fraction Bakery — locked until 80% Pizza Match accuracy over 15 attempts */}
+        {/* Fraction Bakery — locked until 80% Pizza Match accuracy */}
         {data.bakeryUnlocked ? (
           <BigButton
             onClick={() => navigate('bakery')}
@@ -68,9 +68,18 @@ export default function Home({ gameData, navigate }) {
           <LockedButton
             icon="🧁"
             label="Fraction Bakery"
-            hint="Get a bit more pizza practice first! (80% on Pizza Match to unlock)"
+            hint="Get 80% on Pizza Fractions to unlock!"
           />
         )}
+
+        {/* Mole Mart — always available, Tier 3 gated within */}
+        <BigButton
+          onClick={() => navigate('mart')}
+          color="bg-gradient-to-r from-green-500 to-teal-600"
+          icon="🛒"
+          label="Mole Mart"
+          sub="Percentages, discounts &amp; more!"
+        />
       </div>
 
       {/* Secondary buttons */}
@@ -108,8 +117,8 @@ function BigButton({ onClick, color, icon, label, sub }) {
   return (
     <button
       onClick={onClick}
-      className={`${color} text-white rounded-3xl py-5 px-6 flex items-center gap-4 shadow-lg active:scale-95 transition-transform w-full`}
-      style={{ minHeight: 80 }}
+      className={`${color} text-white rounded-3xl py-4 px-6 flex items-center gap-4 shadow-lg active:scale-95 transition-transform w-full`}
+      style={{ minHeight: 72 }}
     >
       <span className="text-4xl">{icon}</span>
       <div className="text-left">
@@ -124,8 +133,8 @@ function BigButton({ onClick, color, icon, label, sub }) {
 function LockedButton({ icon, label, hint }) {
   return (
     <div
-      className="bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 rounded-3xl py-5 px-6 flex items-center gap-4 w-full"
-      style={{ minHeight: 80 }}
+      className="bg-gray-100 border-2 border-dashed border-gray-300 text-gray-400 rounded-3xl py-4 px-6 flex items-center gap-4 w-full"
+      style={{ minHeight: 72 }}
     >
       <span className="text-4xl opacity-50">{icon}</span>
       <div className="text-left flex-1">

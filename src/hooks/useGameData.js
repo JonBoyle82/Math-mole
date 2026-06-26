@@ -1,10 +1,13 @@
 import { useState, useCallback } from 'react'
 import {
   getAllData, recordFactResult, recordFractionResult, recordFractionSumResult,
+  recordPercentageResult,
   addPoints, incrementStreak, resetStreak,
-  unlockBadge, isTableMastered, isBakeryMastered, getFactAccuracy,
+  unlockBadge, isTableMastered, isBakeryMastered, isSmartShopperMastered,
+  getFactAccuracy,
   unlockCosmetic, getUnlockedCosmetics, getActiveCosmetic, setActiveCosmetic,
-  getPoints, getStreak, getBestStreak, getUnlockedBadges, isBakeryUnlocked,
+  getPoints, getStreak, getBestStreak, getUnlockedBadges,
+  isBakeryUnlocked, isDiscountUnlocked,
 } from '../utils/storage'
 
 export function useGameData() {
@@ -81,6 +84,30 @@ export function useGameData() {
     return { points: pts, streak }
   }, [data])
 
+  const handlePercentageResult = useCallback((tier, correct) => {
+    recordPercentageResult(tier, correct)
+    let pts = data.points
+    let streak = data.streak
+    if (correct) {
+      pts = addPoints(15 + Math.floor(data.streak * 2))
+      streak = incrementStreak()
+      if (isSmartShopperMastered()) {
+        unlockBadge('smart_shopper')
+      }
+    } else {
+      streak = resetStreak()
+    }
+    setData(prev => ({
+      ...prev,
+      points: pts,
+      streak,
+      bestStreak: Math.max(prev.bestStreak, streak),
+      discountUnlocked: isDiscountUnlocked(),
+      unlockedBadges: getUnlockedBadges(),
+    }))
+    return { points: pts, streak }
+  }, [data])
+
   const purchaseCosmetic = useCallback((cosmeticId, cost) => {
     if (data.points < cost) return false
     addPoints(-cost)
@@ -98,5 +125,10 @@ export function useGameData() {
     setData(prev => ({ ...prev, activeCosmetic: id }))
   }, [])
 
-  return { data, refresh, handleFactResult, handleFractionResult, handleFractionSumResult, purchaseCosmetic, changeCosmetic }
+  return {
+    data, refresh,
+    handleFactResult, handleFractionResult, handleFractionSumResult,
+    handlePercentageResult,
+    purchaseCosmetic, changeCosmetic,
+  }
 }
