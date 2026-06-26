@@ -3,9 +3,9 @@
 // The game renders all cups shuffled; player picks two that sum to the target.
 
 function gcd(a, b) { return b === 0 ? a : gcd(b, a % b) }
+function lcm(a, b) { return (a * b) / gcd(a, b) }
 
 export function fractionSumEquals(a, b, target) {
-  // Check if a.num/a.den + b.num/b.den === target.num/target.den
   const sumNum = a.num * b.den + b.num * a.den
   const sumDen = a.den * b.den
   return sumNum * target.den === target.num * sumDen
@@ -23,16 +23,30 @@ export function getBakeryExplanation(a, b) {
     const simplified = s.num !== total || s.den !== a.den ? ` (same as ${s.num}/${s.den})` : ''
     return `The bottoms match — just add the tops! ${a.num} + ${b.num} = ${total}, so the answer is ${total}/${a.den}${simplified}. 🧁`
   }
-  // Related denominators — convert smaller to larger
+
   const bigDen = Math.max(a.den, b.den)
-  const small = a.den < b.den ? a : b
-  const big = a.den < b.den ? b : a
-  const factor = bigDen / small.den
-  const convertedNum = small.num * factor
-  const totalNum = convertedNum + big.num
-  const s = simplifyFraction(totalNum, bigDen)
-  const simplified = s.num !== totalNum || s.den !== bigDen ? ` = ${s.num}/${s.den}` : ''
-  return `Change ${small.num}/${small.den} to ${convertedNum}/${bigDen} (×${factor} top and bottom). Then ${convertedNum}/${bigDen} + ${big.num}/${bigDen} = ${totalNum}/${bigDen}${simplified}! 🎉`
+  const smallDen = Math.min(a.den, b.den)
+
+  if (bigDen % smallDen === 0) {
+    // Related denominators — one divides the other
+    const small = a.den < b.den ? a : b
+    const big   = a.den < b.den ? b : a
+    const factor = bigDen / small.den
+    const convertedNum = small.num * factor
+    const totalNum = convertedNum + big.num
+    const s = simplifyFraction(totalNum, bigDen)
+    const simplified = s.num !== totalNum || s.den !== bigDen ? ` = ${s.num}/${s.den}` : ''
+    return `Change ${small.num}/${small.den} to ${convertedNum}/${bigDen} (×${factor} top and bottom). Then ${convertedNum}/${bigDen} + ${big.num}/${bigDen} = ${totalNum}/${bigDen}${simplified}! 🎉`
+  }
+
+  // Unrelated denominators — find the LCD
+  const lcd = lcm(a.den, b.den)
+  const aNum = a.num * (lcd / a.den)
+  const bNum = b.num * (lcd / b.den)
+  const totalNum = aNum + bNum
+  const s = simplifyFraction(totalNum, lcd)
+  const simplified = s.num !== totalNum || s.den !== lcd ? ` = ${s.num}/${s.den}` : ''
+  return `Convert both to /${lcd}: ${a.num}/${a.den} → ${aNum}/${lcd} and ${b.num}/${b.den} → ${bNum}/${lcd}. Then ${aNum}/${lcd} + ${bNum}/${lcd} = ${totalNum}/${lcd}${simplified}! 🎉`
 }
 
 // ── Tier 1: same-denominator sums ─────────────────────────────────────────────
@@ -115,17 +129,57 @@ const TIER2 = [
   },
 ]
 
-// ── Tier 3: stub — unrelated denominators requiring true LCD ──────────────────
-// Not yet implemented. To add: populate TIER3 with puzzles where neither
-// denominator divides the other (e.g. 1/3 + 1/4 = 7/12). The explanation
-// function already handles any pair — just add puzzles here and add the tier
-// to BAKERY_TIERS below with comingSoon: false.
-const TIER3 = []
+// ── Tier 3: unrelated denominators — true LCD required ────────────────────────
+// Neither denominator divides the other, so the LCD = LCM of both.
+const TIER3 = [
+  {
+    // 1/2 + 1/3 = 5/6  (LCD 6)
+    target: { num: 5, den: 6 },
+    correctA: { num: 1, den: 2 },
+    correctB: { num: 1, den: 3 },
+    distractors: [{ num: 4, den: 6 }, { num: 2, den: 5 }, { num: 3, den: 5 }, { num: 2, den: 6 }],
+  },
+  {
+    // 1/3 + 1/4 = 7/12  (LCD 12)
+    target: { num: 7, den: 12 },
+    correctA: { num: 1, den: 3 },
+    correctB: { num: 1, den: 4 },
+    distractors: [{ num: 2, den: 7 }, { num: 5, den: 12 }, { num: 8, den: 12 }, { num: 1, den: 12 }],
+  },
+  {
+    // 2/3 + 1/4 = 11/12  (LCD 12)
+    target: { num: 11, den: 12 },
+    correctA: { num: 2, den: 3 },
+    correctB: { num: 1, den: 4 },
+    distractors: [{ num: 3, den: 7 }, { num: 9, den: 12 }, { num: 10, den: 12 }, { num: 7, den: 12 }],
+  },
+  {
+    // 1/2 + 2/5 = 9/10  (LCD 10)
+    target: { num: 9, den: 10 },
+    correctA: { num: 1, den: 2 },
+    correctB: { num: 2, den: 5 },
+    distractors: [{ num: 3, den: 7 }, { num: 7, den: 10 }, { num: 8, den: 10 }, { num: 3, den: 10 }],
+  },
+  {
+    // 1/2 + 1/5 = 7/10  (LCD 10)
+    target: { num: 7, den: 10 },
+    correctA: { num: 1, den: 2 },
+    correctB: { num: 1, den: 5 },
+    distractors: [{ num: 2, den: 7 }, { num: 5, den: 10 }, { num: 6, den: 10 }, { num: 8, den: 10 }],
+  },
+  {
+    // 1/4 + 1/6 = 5/12  (LCD 12)
+    target: { num: 5, den: 12 },
+    correctA: { num: 1, den: 4 },
+    correctB: { num: 1, den: 6 },
+    distractors: [{ num: 2, den: 10 }, { num: 3, den: 12 }, { num: 4, den: 12 }, { num: 6, den: 12 }],
+  },
+]
 
 export const BAKERY_TIERS = [
   { id: 'tier1', label: 'Same Slices', puzzles: TIER1, comingSoon: false },
-  { id: 'tier2', label: 'Mix It Up', puzzles: TIER2, comingSoon: false },
-  { id: 'tier3', label: 'Any Mix', puzzles: TIER3, comingSoon: true },
+  { id: 'tier2', label: 'Mix It Up',   puzzles: TIER2, comingSoon: false },
+  { id: 'tier3', label: 'Any Mix',     puzzles: TIER3, comingSoon: false },
 ]
 
 export function pickBakeryPuzzle(tierId) {
@@ -135,13 +189,11 @@ export function pickBakeryPuzzle(tierId) {
 }
 
 export function buildBakeryCups(puzzle) {
-  // Returns a shuffled array of cup objects, each tagged with an id
   const cups = [
     { ...puzzle.correctA, id: 0 },
     { ...puzzle.correctB, id: 1 },
     ...puzzle.distractors.map((d, i) => ({ ...d, id: i + 2 })),
   ]
-  // Shuffle
   for (let i = cups.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [cups[i], cups[j]] = [cups[j], cups[i]]
