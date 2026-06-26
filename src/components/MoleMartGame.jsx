@@ -7,10 +7,51 @@ import {
   EQUIVALENTS, PERCENT_TRICKS,
 } from '../data/percentages'
 
+// All candidate grid shapes. Scattered = filled cells are random, not top-left.
+const GRID_SHAPES = [
+  { rows: 10, cols: 10, scattered: false, label: '100 squares' },
+  { rows: 10, cols: 10, scattered: true,  label: '100 squares' },
+  { rows: 5,  cols: 4,  scattered: false, label: '20 squares'  },
+  { rows: 5,  cols: 4,  scattered: true,  label: '20 squares'  },
+  { rows: 4,  cols: 5,  scattered: false, label: '20 squares'  },
+  { rows: 4,  cols: 5,  scattered: true,  label: '20 squares'  },
+  { rows: 2,  cols: 5,  scattered: false, label: '10 squares'  },
+  { rows: 2,  cols: 5,  scattered: true,  label: '10 squares'  },
+  { rows: 1,  cols: 10, scattered: false, label: '10 squares'  },
+  { rows: 2,  cols: 10, scattered: false, label: '20 squares'  },
+  { rows: 2,  cols: 10, scattered: true,  label: '20 squares'  },
+]
+
+function pickGridConfig(pct) {
+  const valid = GRID_SHAPES.filter(s => {
+    const total = s.rows * s.cols
+    return Number.isInteger(pct * total / 100)
+  })
+  const shape = valid[Math.floor(Math.random() * valid.length)]
+  const total = shape.rows * shape.cols
+  const filledCount = Math.round(pct * total / 100)
+
+  let fillIndices
+  if (shape.scattered) {
+    // Fisher-Yates shuffle of all indices, take first filledCount
+    const indices = Array.from({ length: total }, (_, i) => i)
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]]
+    }
+    fillIndices = indices.slice(0, filledCount).sort((a, b) => a - b)
+  } else {
+    fillIndices = Array.from({ length: filledCount }, (_, i) => i)
+  }
+
+  return { ...shape, fillIndices, filledCount }
+}
+
 export default function MoleMartGame({ gameData, navigate }) {
   const { data, handlePercentageResult } = gameData
   const [tierId, setTierId] = useState('tier1')
   const [puzzle, setPuzzle] = useState(null)
+  const [gridConfig, setGridConfig] = useState(null)
   const [holes, setHoles] = useState([])
   const [holeStates, setHoleStates] = useState({})
   const [showConfetti, setShowConfetti] = useState(false)
@@ -25,12 +66,15 @@ export default function MoleMartGame({ gameData, navigate }) {
     if (tid === 'tier1') {
       answer = p.pct
       distractors = p.distractors
+      setGridConfig(pickGridConfig(p.pct))
     } else if (tid === 'tier2') {
       answer = p.answer
       distractors = p.distractors
+      setGridConfig(null)
     } else if (tid === 'tier3') {
       answer = p.salePrice
       distractors = p.distractors
+      setGridConfig(null)
     }
     setPuzzle(p)
     setHoles(buildMartHoles(answer, distractors, 9))
@@ -133,7 +177,7 @@ export default function MoleMartGame({ gameData, navigate }) {
                   : 'bg-white text-green-700 border-2 border-green-200'
               }`}
             >
-              {cs ? `🔒 ${t.label}` : locked ? `🔒 ${t.label}` : t.label}
+              {cs || locked ? `🔒 ${t.label}` : t.label}
             </button>
           )
         })}
@@ -153,11 +197,19 @@ export default function MoleMartGame({ gameData, navigate }) {
       {/* Puzzle area */}
       {puzzle && !isLocked && (
         <>
-          {/* Tier 1 — grid */}
-          {tierId === 'tier1' && (
+          {/* Tier 1 — varied grid */}
+          {tierId === 'tier1' && gridConfig && (
             <div className="bg-white rounded-3xl shadow-xl p-4 flex flex-col items-center gap-2 w-full">
               <p className="font-bold text-gray-600 text-sm">What percentage is shaded? 🟧</p>
-              <PercentageGrid pct={puzzle.pct} size={210} />
+              <PercentageGrid
+                rows={gridConfig.rows}
+                cols={gridConfig.cols}
+                fillIndices={gridConfig.fillIndices}
+                width={Math.min(320, gridConfig.cols * 32)}
+              />
+              <p className="text-xs text-gray-400 font-semibold">
+                {gridConfig.filledCount} of {gridConfig.rows * gridConfig.cols} squares shaded
+              </p>
             </div>
           )}
 
@@ -212,7 +264,7 @@ export default function MoleMartGame({ gameData, navigate }) {
             ))}
           </div>
 
-          {/* Trick card (Tier 2) or next button */}
+          {/* Trick card (Tier 2) */}
           {trickCard && (
             <div className="bg-gradient-to-br from-green-50 to-teal-50 border-2 border-green-200 rounded-3xl p-4 w-full animate-pop-in">
               <div className="flex items-center gap-2 mb-2">
