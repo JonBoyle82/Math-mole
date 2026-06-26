@@ -1,13 +1,24 @@
 // SVG pizza slice renderer
-export default function PizzaFraction({ num, den, size = 100, highlighted = false, selected = false, correct = null }) {
+// rotate: degrees to spin the whole pizza (randomised on option pizzas to prevent pattern-matching)
+// showLabel: set false on options to force visual thinking; revealed after answer
+export default function PizzaFraction({
+  num, den,
+  size = 100,
+  highlighted = false,
+  selected = false,
+  correct = null,
+  rotate = 0,
+  showLabel = true,
+}) {
   const cx = size / 2
   const cy = size / 2
   const r = size * 0.44
   const slices = []
+  const offsetRad = (rotate * Math.PI) / 180
 
   for (let i = 0; i < den; i++) {
-    const startAngle = (i / den) * 2 * Math.PI - Math.PI / 2
-    const endAngle = ((i + 1) / den) * 2 * Math.PI - Math.PI / 2
+    const startAngle = (i / den) * 2 * Math.PI - Math.PI / 2 + offsetRad
+    const endAngle = ((i + 1) / den) * 2 * Math.PI - Math.PI / 2 + offsetRad
     const x1 = cx + r * Math.cos(startAngle)
     const y1 = cy + r * Math.sin(startAngle)
     const x2 = cx + r * Math.cos(endAngle)
@@ -36,12 +47,12 @@ export default function PizzaFraction({ num, den, size = 100, highlighted = fals
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       <circle cx={cx} cy={cy} r={r + 4} fill="white" stroke={ringColor} strokeWidth={selected || correct !== null ? 4 : 2} />
       {slices}
-      {/* crust */}
       <circle cx={cx} cy={cy} r={r} fill="none" stroke="#92400e" strokeWidth="2" />
-      {/* fraction label */}
-      <text x={cx} y={size - 6} textAnchor="middle" fontSize="11" fill="#78350f" fontWeight="bold" fontFamily="Nunito">
-        {num}/{den}
-      </text>
+      {showLabel && (
+        <text x={cx} y={size - 6} textAnchor="middle" fontSize="11" fill="#78350f" fontWeight="bold" fontFamily="Nunito">
+          {num}/{den}
+        </text>
+      )}
     </svg>
   )
 }

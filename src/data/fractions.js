@@ -1,6 +1,6 @@
 // Fraction equivalence sets for the Pizza Match game
-// Each "puzzle" has a target fraction and a set of options (some equivalent, some not)
-// Tier 1: halves, quarters; Tier 2: thirds, sixths; Tier 3: fifths, eighths, tenths
+// Distractors are deliberately close — same denominator as a correct answer
+// but wrong numerator, or a visually similar size that's mathematically different.
 
 export const FRACTION_TIERS = [
   {
@@ -10,34 +10,34 @@ export const FRACTION_TIERS = [
       {
         target: { num: 1, den: 2 },
         options: [
-          { num: 2, den: 4, correct: true },
-          { num: 3, den: 6, correct: true },
-          { num: 1, den: 3, correct: false },
-          { num: 2, den: 3, correct: false },
-          { num: 3, den: 4, correct: false },
-          { num: 4, den: 8, correct: true },
+          { num: 2, den: 4,  correct: true  },
+          { num: 4, den: 8,  correct: true  },
+          { num: 3, den: 4,  correct: false }, // 3 out of 4 — looks big, not half
+          { num: 1, den: 4,  correct: false }, // only a quarter
+          { num: 3, den: 8,  correct: false }, // 3/8 < 1/2, easy to confuse
+          { num: 5, den: 8,  correct: false }, // 5/8 > 1/2, easy to confuse
         ],
       },
       {
         target: { num: 1, den: 4 },
         options: [
-          { num: 2, den: 8, correct: true },
-          { num: 3, den: 12, correct: true },
-          { num: 1, den: 2, correct: false },
-          { num: 2, den: 6, correct: false },
-          { num: 3, den: 8, correct: false },
-          { num: 4, den: 12, correct: false },
+          { num: 2, den: 8,  correct: true  },
+          { num: 3, den: 12, correct: true  },
+          { num: 3, den: 8,  correct: false }, // same den as correct, wrong count
+          { num: 1, den: 8,  correct: false }, // too small
+          { num: 4, den: 12, correct: false }, // same den as correct, = 1/3
+          { num: 2, den: 12, correct: false }, // same den as correct, = 1/6
         ],
       },
       {
         target: { num: 3, den: 4 },
         options: [
-          { num: 6, den: 8, correct: true },
-          { num: 9, den: 12, correct: true },
-          { num: 2, den: 4, correct: false },
-          { num: 4, den: 6, correct: false },
-          { num: 3, den: 8, correct: false },
-          { num: 2, den: 8, correct: false },
+          { num: 6, den: 8,  correct: true  },
+          { num: 9, den: 12, correct: true  },
+          { num: 5, den: 8,  correct: false }, // same den, off by one slice
+          { num: 7, den: 8,  correct: false }, // same den, too many
+          { num: 8, den: 12, correct: false }, // same den, = 2/3
+          { num: 10, den: 12, correct: false },// same den, > 3/4
         ],
       },
     ],
@@ -49,34 +49,34 @@ export const FRACTION_TIERS = [
       {
         target: { num: 1, den: 3 },
         options: [
-          { num: 2, den: 6, correct: true },
-          { num: 4, den: 12, correct: true },
-          { num: 1, den: 4, correct: false },
-          { num: 2, den: 4, correct: false },
-          { num: 3, den: 6, correct: false },
-          { num: 3, den: 12, correct: false },
+          { num: 2, den: 6,  correct: true  },
+          { num: 4, den: 12, correct: true  },
+          { num: 3, den: 6,  correct: false }, // same den as correct, = 1/2
+          { num: 1, den: 6,  correct: false }, // same den, too small
+          { num: 5, den: 12, correct: false }, // same den, close but wrong
+          { num: 3, den: 12, correct: false }, // same den, = 1/4
         ],
       },
       {
         target: { num: 2, den: 3 },
         options: [
-          { num: 4, den: 6, correct: true },
-          { num: 8, den: 12, correct: true },
-          { num: 3, den: 6, correct: false },
-          { num: 5, den: 6, correct: false },
-          { num: 6, den: 12, correct: false },
-          { num: 3, den: 4, correct: false },
+          { num: 4, den: 6,  correct: true  },
+          { num: 8, den: 12, correct: true  },
+          { num: 5, den: 6,  correct: false }, // same den, one too many
+          { num: 3, den: 6,  correct: false }, // same den, = 1/2
+          { num: 9, den: 12, correct: false }, // same den, = 3/4
+          { num: 7, den: 12, correct: false }, // same den, close
         ],
       },
       {
         target: { num: 1, den: 6 },
         options: [
-          { num: 2, den: 12, correct: true },
-          { num: 1, den: 3, correct: false },
-          { num: 3, den: 12, correct: false },
-          { num: 2, den: 6, correct: false },
-          { num: 1, den: 4, correct: false },
-          { num: 4, den: 12, correct: false },
+          { num: 2, den: 12, correct: true  },
+          { num: 3, den: 12, correct: false }, // same den, = 1/4 — very close visually
+          { num: 1, den: 12, correct: false }, // same den, half as much
+          { num: 4, den: 12, correct: false }, // same den, = 1/3
+          { num: 2, den: 6,  correct: false }, // double the target
+          { num: 1, den: 4,  correct: false }, // close in value (0.25 vs 0.167)
         ],
       },
     ],
@@ -88,34 +88,34 @@ export const FRACTION_TIERS = [
       {
         target: { num: 2, den: 5 },
         options: [
-          { num: 4, den: 10, correct: true },
-          { num: 3, den: 5, correct: false },
-          { num: 1, den: 5, correct: false },
-          { num: 6, den: 10, correct: false },
-          { num: 2, den: 10, correct: false },
-          { num: 4, den: 8, correct: false },
+          { num: 4, den: 10, correct: true  },
+          { num: 3, den: 10, correct: false }, // same den, off by one — 0.3 vs 0.4
+          { num: 5, den: 10, correct: false }, // same den, = 1/2
+          { num: 6, den: 10, correct: false }, // same den, = 3/5
+          { num: 3, den: 5,  correct: false }, // same original den, wrong count
+          { num: 1, den: 5,  correct: false }, // same original den, half target
         ],
       },
       {
         target: { num: 3, den: 8 },
         options: [
-          { num: 6, den: 16, correct: true },
-          { num: 5, den: 8, correct: false },
-          { num: 1, den: 4, correct: false },
-          { num: 3, den: 4, correct: false },
-          { num: 9, den: 16, correct: false },
-          { num: 6, den: 8, correct: false },
+          { num: 6, den: 16, correct: true  },
+          { num: 7, den: 16, correct: false }, // same den, off by one
+          { num: 5, den: 16, correct: false }, // same den, one under
+          { num: 4, den: 8,  correct: false }, // same original den, = 1/2
+          { num: 2, den: 8,  correct: false }, // same original den, = 1/4
+          { num: 8, den: 16, correct: false }, // same den, = 1/2
         ],
       },
       {
         target: { num: 3, den: 10 },
         options: [
-          { num: 6, den: 20, correct: true },
-          { num: 4, den: 10, correct: false },
-          { num: 1, den: 10, correct: false },
-          { num: 3, den: 5, correct: false },
-          { num: 9, den: 20, correct: false },
-          { num: 2, den: 10, correct: false },
+          { num: 6, den: 20, correct: true  },
+          { num: 7, den: 20, correct: false }, // same den, off by one
+          { num: 5, den: 20, correct: false }, // same den, = 1/4
+          { num: 4, den: 10, correct: false }, // same original den, = 2/5
+          { num: 2, den: 10, correct: false }, // same original den, = 1/5
+          { num: 9, den: 20, correct: false }, // same den, close
         ],
       },
     ],
