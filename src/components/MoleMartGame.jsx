@@ -4,7 +4,7 @@ import PercentageGrid from './PercentageGrid'
 import Confetti from './Confetti'
 import {
   MART_TIERS, pickMartPuzzle, buildMartHoles,
-  EQUIVALENTS, PERCENT_TRICKS,
+  EQUIVALENTS, PERCENT_TRICKS, REVERSE_TRICK,
 } from '../data/percentages'
 
 // All candidate grid shapes. Scattered = filled cells are random, not top-left.
@@ -33,7 +33,6 @@ function pickGridConfig(pct) {
 
   let fillIndices
   if (shape.scattered) {
-    // Fisher-Yates shuffle of all indices, take first filledCount
     const indices = Array.from({ length: total }, (_, i) => i)
     for (let i = indices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -57,7 +56,6 @@ export default function MoleMartGame({ gameData, navigate }) {
   const [showConfetti, setShowConfetti] = useState(false)
   const [feedbackMsg, setFeedbackMsg] = useState('')
   const [trickCard, setTrickCard] = useState(null)
-  const [isLocked, setIsLocked] = useState(false)
 
   const loadPuzzle = useCallback((tid) => {
     const p = pickMartPuzzle(tid)
@@ -75,6 +73,10 @@ export default function MoleMartGame({ gameData, navigate }) {
       answer = p.salePrice
       distractors = p.distractors
       setGridConfig(null)
+    } else if (tid === 'tier4') {
+      answer = p.answer
+      distractors = p.distractors
+      setGridConfig(null)
     }
     setPuzzle(p)
     setHoles(buildMartHoles(answer, distractors, 9))
@@ -84,16 +86,15 @@ export default function MoleMartGame({ gameData, navigate }) {
   }, [])
 
   useEffect(() => {
-    setIsLocked(tierId === 'tier3' && !data.discountUnlocked)
-    if (tierId === 'tier3' && !data.discountUnlocked) return
     loadPuzzle(tierId)
-  }, [tierId, data.discountUnlocked])
+  }, [tierId])
 
   const getCorrectAnswer = () => {
     if (!puzzle) return null
     if (tierId === 'tier1') return puzzle.pct
     if (tierId === 'tier2') return puzzle.answer
     if (tierId === 'tier3') return puzzle.salePrice
+    if (tierId === 'tier4') return puzzle.answer
     return null
   }
 
@@ -119,6 +120,9 @@ export default function MoleMartGame({ gameData, navigate }) {
         setTrickCard(PERCENT_TRICKS[puzzle.pct] || null)
       } else if (tierId === 'tier3') {
         setFeedbackMsg(`✨ R${puzzle.salePrice}! (R${puzzle.price} − R${puzzle.discountAmt} = R${puzzle.salePrice})${streakMsg}`)
+      } else if (tierId === 'tier4') {
+        setFeedbackMsg(`✨ ${puzzle.part} ÷ ${puzzle.whole} × 100 = ${puzzle.answer}%${streakMsg}`)
+        setTrickCard(REVERSE_TRICK)
       }
       setTimeout(() => setShowConfetti(false), 1500)
     } else {
@@ -131,6 +135,9 @@ export default function MoleMartGame({ gameData, navigate }) {
         setTrickCard(PERCENT_TRICKS[puzzle.pct] || null)
       } else if (tierId === 'tier3') {
         setFeedbackMsg(`${puzzle.discountPct}% off R${puzzle.price}: R${puzzle.price} − R${puzzle.discountAmt} = R${puzzle.salePrice} 💡`)
+      } else if (tierId === 'tier4') {
+        setFeedbackMsg(`${puzzle.part} ÷ ${puzzle.whole} × 100 = ${puzzle.answer}% — check the trick! 💪`)
+        setTrickCard(REVERSE_TRICK)
       }
       setTimeout(() => loadPuzzle(tierId), 2500)
     }
@@ -161,41 +168,23 @@ export default function MoleMartGame({ gameData, navigate }) {
 
       {/* Tier selector */}
       <div className="flex gap-2 w-full justify-center flex-wrap">
-        {MART_TIERS.map(t => {
-          const locked = t.gated && !data.discountUnlocked
-          const cs = t.comingSoon
-          return (
-            <button
-              key={t.id}
-              onClick={() => !locked && !cs && setTierId(t.id)}
-              disabled={locked || cs}
-              className={`px-3 py-2 rounded-2xl font-bold text-xs transition-all active:scale-95 ${
-                cs || locked
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : tierId === t.id
-                  ? 'bg-green-500 text-white shadow-md'
-                  : 'bg-white text-green-700 border-2 border-green-200'
-              }`}
-            >
-              {cs || locked ? `🔒 ${t.label}` : t.label}
-            </button>
-          )
-        })}
+        {MART_TIERS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTierId(t.id)}
+            className={`px-3 py-2 rounded-2xl font-bold text-xs transition-all active:scale-95 ${
+              tierId === t.id
+                ? 'bg-green-500 text-white shadow-md'
+                : 'bg-white text-green-700 border-2 border-green-200'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {/* Locked Tier 3 message */}
-      {isLocked && (
-        <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-3xl p-6 w-full text-center">
-          <p className="text-4xl mb-2">🔒</p>
-          <p className="font-fun text-xl text-gray-600">Discounts Locked</p>
-          <p className="text-sm text-gray-500 mt-1 font-semibold">
-            Score 80%+ on "% of Number" (15 attempts) to unlock Mole Mart discounts!
-          </p>
-        </div>
-      )}
-
       {/* Puzzle area */}
-      {puzzle && !isLocked && (
+      {puzzle && (
         <>
           {/* Tier 1 — varied grid */}
           {tierId === 'tier1' && gridConfig && (
@@ -240,6 +229,16 @@ export default function MoleMartGame({ gameData, navigate }) {
             </div>
           )}
 
+          {/* Tier 4 — reverse % */}
+          {tierId === 'tier4' && (
+            <div className="bg-white rounded-3xl shadow-xl px-8 py-6 text-center w-full">
+              <p className="text-gray-500 font-semibold text-sm mb-1">What percentage?</p>
+              <p className="font-fun text-4xl text-green-700 leading-tight">
+                {puzzle.part} is ___% of {puzzle.whole}
+              </p>
+            </div>
+          )}
+
           {/* Feedback */}
           {feedbackMsg && (
             <div className={`rounded-2xl px-4 py-2 font-bold text-sm text-center animate-pop-in w-full ${
@@ -254,7 +253,12 @@ export default function MoleMartGame({ gameData, navigate }) {
             {holes.map((value, i) => (
               <div key={i} className="flex justify-center">
                 <MoleHole
-                  value={tierId === 'tier3' ? `R${value}` : `${value}${tierId === 'tier1' ? '%' : ''}`}
+                  value={
+                    tierId === 'tier3' ? `R${value}` :
+                    tierId === 'tier1' ? `${value}%` :
+                    tierId === 'tier4' ? `${value}%` :
+                    `${value}`
+                  }
                   onClick={() => handleHoleTap(i, value)}
                   state={holeStates[i] || null}
                   cosmetic={data.activeCosmetic}
@@ -264,7 +268,7 @@ export default function MoleMartGame({ gameData, navigate }) {
             ))}
           </div>
 
-          {/* Trick card (Tier 2) */}
+          {/* Trick card (Tier 2 & 4) */}
           {trickCard && (
             <div className="bg-gradient-to-br from-green-50 to-teal-50 border-2 border-green-200 rounded-3xl p-4 w-full animate-pop-in">
               <div className="flex items-center gap-2 mb-2">

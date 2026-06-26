@@ -142,19 +142,54 @@ export const TIER3_PUZZLES = [
   t3('Lunchbox',   '🥡', 80,  20),   // R64
 ]
 
-// ── Tier 4: stub ─────────────────────────────────────────────────────────────
-// To add later:
-//   - % increase/decrease: "A price goes from R80 to R100 — what % increase is that?"
-//   - Reverse %: "R20 is what % of R80?"
-// Add puzzles here and set comingSoon: false on the tier below.
-export const TIER4_PUZZLES = []
+// ── Tier 4: Reverse % — "X is what % of Y?" ──────────────────────────────────
+// Answers are always mental-math percentages so trick cards still apply.
+function t4(part, whole) {
+  const answer = Math.round(part / whole * 100)
+  const decoys = new Set()
+  decoys.add(answer + 10)
+  decoys.add(Math.max(5, answer - 10))
+  decoys.add(answer * 2)
+  decoys.add(Math.max(5, Math.round(answer / 2)))
+  decoys.add(whole - part)   // "subtracted instead of divided" confusion
+  decoys.add(part)           // raw number confusion
+  decoys.delete(answer)
+  return {
+    part, whole, answer,
+    distractors: [...decoys].filter(v => v > 0 && v !== answer && v <= 100).slice(0, 6),
+  }
+}
+
+export const TIER4_PUZZLES = [
+  t4(20, 100),   // 20%
+  t4(50, 100),   // 50%
+  t4(25, 100),   // 25%
+  t4(5,  100),   // 5%
+  t4(30, 60),    // 50%
+  t4(4,  40),    // 10%
+  t4(3,  60),    // 5%
+  t4(10, 50),    // 20%
+  t4(15, 60),    // 25%
+  t4(45, 90),    // 50%
+  t4(8,  80),    // 10%
+  t4(16, 80),    // 20%
+  t4(20, 80),    // 25%
+  t4(6,  30),    // 20%
+  t4(2,  40),    // 5%
+]
+
+export const REVERSE_TRICK = {
+  trick: 'Reverse %: (part ÷ whole) × 100 = %',
+  example: '20 is what % of 80?  →  20 ÷ 80 = 0.25  →  × 100 = 25%',
+  emoji: '🔄',
+}
 
 // ── Tier registry ─────────────────────────────────────────────────────────────
 export const MART_TIERS = [
-  { id: 'tier1', label: 'Read %',    puzzles: TIER1_PUZZLES, comingSoon: false },
+  { id: 'tier1', label: 'Read %',      puzzles: TIER1_PUZZLES, comingSoon: false },
   { id: 'tier2', label: '% of Number', puzzles: TIER2_PUZZLES, comingSoon: false },
-  { id: 'tier3', label: 'Discounts', puzzles: TIER3_PUZZLES, comingSoon: false, gated: true },
-  { id: 'tier4', label: 'Reverse %', puzzles: TIER4_PUZZLES, comingSoon: true  },
+  { id: 'tier3', label: 'Discounts',   puzzles: TIER3_PUZZLES, comingSoon: false },
+  { id: 'tier4', label: 'Reverse %',   puzzles: TIER4_PUZZLES, comingSoon: false },
 ]
 
 export function pickMartPuzzle(tierId) {
