@@ -1,9 +1,14 @@
 const MOLE_COLORS = {
-  default: 'from-amber-400 to-amber-600',
-  blue: 'from-blue-400 to-blue-600',
-  pink: 'from-pink-400 to-pink-600',
-  green: 'from-green-400 to-green-600',
-  purple: 'from-purple-400 to-purple-600',
+  default:  'from-amber-400 to-amber-600',
+  ocean:    'from-blue-400 to-blue-600',
+  blossom:  'from-pink-400 to-pink-600',
+  forest:   'from-green-500 to-green-700',
+  galaxy:   'from-purple-400 to-purple-600',
+  sunset:   'from-orange-400 to-red-500',
+  arctic:   'from-cyan-300 to-blue-500',
+  lava:     'from-red-500 to-red-700',
+  midnight: 'from-indigo-600 to-indigo-900',
+  crown:    'from-yellow-400 to-amber-500',
 }
 
 export default function Home({ gameData, navigate }) {

@@ -22,11 +22,16 @@ const BADGES = [
 ]
 
 const COSMETICS = [
-  { id: 'default', label: 'Classic', color: 'from-amber-400 to-amber-600', cost: 0, emoji: '🦔' },
-  { id: 'blue', label: 'Ocean', color: 'from-blue-400 to-blue-600', cost: 100, emoji: '🦔' },
-  { id: 'pink', label: 'Blossom', color: 'from-pink-400 to-pink-600', cost: 100, emoji: '🦔' },
-  { id: 'green', label: 'Forest', color: 'from-green-400 to-green-600', cost: 150, emoji: '🦔' },
-  { id: 'purple', label: 'Galaxy', color: 'from-purple-400 to-purple-600', cost: 200, emoji: '🦔' },
+  { id: 'default',  label: 'Classic',   color: 'from-amber-400 to-amber-600',   cost: 0,     emoji: '🦔' },
+  { id: 'ocean',    label: 'Ocean',     color: 'from-blue-400 to-blue-600',     cost: 5000,  emoji: '🌊' },
+  { id: 'blossom',  label: 'Blossom',   color: 'from-pink-400 to-pink-600',     cost: 10000, emoji: '🌸' },
+  { id: 'forest',   label: 'Forest',    color: 'from-green-500 to-green-700',   cost: 15000, emoji: '🌿' },
+  { id: 'galaxy',   label: 'Galaxy',    color: 'from-purple-400 to-purple-600', cost: 20000, emoji: '🌌' },
+  { id: 'sunset',   label: 'Sunset',    color: 'from-orange-400 to-red-500',    cost: 25000, emoji: '🌅' },
+  { id: 'arctic',   label: 'Arctic',    color: 'from-cyan-300 to-blue-500',     cost: 30000, emoji: '❄️' },
+  { id: 'lava',     label: 'Lava',      color: 'from-red-500 to-red-700',       cost: 35000, emoji: '🌋' },
+  { id: 'midnight', label: 'Midnight',  color: 'from-indigo-600 to-indigo-900', cost: 40000, emoji: '🌙' },
+  { id: 'crown',    label: 'Crown',     color: 'from-yellow-400 to-amber-500',  cost: 45000, emoji: '👑' },
 ]
 
 export default function RewardsScreen({ gameData, navigate }) {
