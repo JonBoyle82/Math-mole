@@ -55,22 +55,13 @@ export default function Home({ gameData, navigate }) {
           sub="Match the slices!"
         />
 
-        {/* Fraction Bakery — locked until 80% Pizza Match accuracy */}
-        {data.bakeryUnlocked ? (
-          <BigButton
-            onClick={() => navigate('bakery')}
-            color="bg-gradient-to-r from-orange-400 to-amber-500"
-            icon="🧁"
-            label="Fraction Bakery"
-            sub="Add fractions to fill orders!"
-          />
-        ) : (
-          <LockedButton
-            icon="🧁"
-            label="Fraction Bakery"
-            hint="Get 80% on Pizza Fractions to unlock!"
-          />
-        )}
+        <BigButton
+          onClick={() => navigate('bakery')}
+          color="bg-gradient-to-r from-orange-400 to-amber-500"
+          icon="🧁"
+          label="Fraction Bakery"
+          sub="Add fractions to fill orders!"
+        />
 
         {/* Mole Mart — always available, Tier 3 gated within */}
         <BigButton
